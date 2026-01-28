@@ -1,4 +1,4 @@
-CUSTOMER MEETING CADENCE ANALYSIS — Version 2.0 (M365 Copilot)
+CUSTOMER MEETING CADENCE ANALYSIS — Version 2.1 (M365 Copilot)
 
 Extract customer-related meeting cadences from my Microsoft 365 calendar data with maximum accuracy and minimum false positives. Use calendar metadata as the sole source of truth. Recurrence requires evidence, not intuition. Organizer behavior is treated conservatively. Email domains outweigh display names. Omission is preferred over misclassification.
 
@@ -98,6 +98,18 @@ ALLOWED CADENCE VALUES: weekly, bi-weekly, monthly, quarterly
 
 If cadence cannot be confidently assigned, use "—".
 
+INTERNAL vs EXTERNAL CLASSIFICATION (CRITICAL):
+
+Classify each meeting row as "internal" or "external" using this authoritative rule:
+
+A meeting is "external" if ANY of the following are true:
+- The organizer's email domain matches ANY value in external_domains for ANY customer, OR
+- ANY attendee's email domain matches ANY value in external_domains for ANY customer
+
+A meeting is "internal" ONLY if ALL participants (organizer AND all attendees) have email domains that do NOT match any value in external_domains.
+
+EXAMPLE: A meeting organized by an internal CSA (e.g., nicholas.oneil@microsoft.com) with an attendee from OneMain Financial (e.g., jane.smith@onemainfinancial.com) is classified as "external" because the attendee's domain matches the customer's external_domains list.
+
 OUTPUT (REQUIRED):
 
 Produce ONE table with EXACT columns:
@@ -105,7 +117,7 @@ Produce ONE table with EXACT columns:
 
 RULES:
 - organizer = calendar organizer display name
-- internal/external = derived strictly from organizer email domain
+- internal/external = "external" if organizer OR any attendee email domain matches external_domains; "internal" if all participants are internal
 - recurring vs one-off = literal values only
 - cadence = allowed cadence or "—"
 
@@ -113,7 +125,7 @@ FACT-FINDING NARRATIVE (MANDATORY):
 
 Provide one short paragraph explaining:
 - How organizer identity was determined (calendar organizer field)
-- How internal/external status was derived (email domain)
+- How internal/external status was derived (organizer AND attendee email domains evaluated against external_domains)
 - Why meetings were recurring or one-off (allowed evidence only)
 - Why cadence was or was not assigned
 
@@ -126,5 +138,6 @@ GLOBAL NON-NEGOTIABLE RULES:
 - Aliases widen inclusion, never classification
 - Weak aliases require corroboration
 - Prefer omission over misclassification
+- Internal/external classification examines ALL participants, not just organizer
 
 Execute this analysis now using my M365 calendar data within the specified analysis window.
